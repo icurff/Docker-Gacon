@@ -1,0 +1,47 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.nginx
+    container_name: nginx_server
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/dist:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - mysql
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laravel_backend
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      DB_HOST: mysql
+      DB_DATABASE: bookstoredb
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+    depends_on:
+      - mysql
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react_frontend
+    volumes:
+      - ./frontend:/app
+
+  mysql:
+    image: mysql:9.1
+    container_name: mysql_database
+    environment:
+      MYSQL_DATABASE: bookstoredb
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - /mysql_data:/var/lib/mysql
