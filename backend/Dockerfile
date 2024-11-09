@@ -15,22 +15,16 @@ RUN apt-get update && apt-get install -y \
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Install Composer (PHP Dependency Manager)
+WORKDIR /var/www/html
+COPY . .
+
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www/html
-
-# Allow Composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER=1
-
-# Copy Laravel project files into the container
-COPY . /var/www/html
-
 # Install Laravel dependencies
-RUN composer update
+RUN composer install
 
-EXPOSE 8000
+EXPOSE 3096
 
 # Use the default www-data user
 USER www-data
